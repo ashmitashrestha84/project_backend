@@ -1,6 +1,10 @@
 import app from "./app";
-
+import { connectDatabase } from "./config/db.config";
 const PORT = 8080;
+const DB_URI="mongodb://localhost:27017/team_14_db"
+
+//* connect database
+connectDatabase(DB_URI);
 
 
 
