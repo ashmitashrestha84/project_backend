@@ -8,11 +8,17 @@ export const errorHandler=(
 )=>{
     console.log(error);
     const message=error?.message ?? "Internal Server Error";
-    const status=error?.status ?? "error";
-    const statusCode=error?.statusCode ?? 500;
+    let status=error?.status ?? "error";
+    let statusCode=error?.statusCode ?? 500;
     const success=false;
 
-    res.status(200).json({
+    if(error?.cause?.code===11000){
+        statusCode=400;
+        status="fail";
+    }
+    console.log(error?.cause?.code);
+
+    res.status(statusCode).json({
         message,
         success,
         status,
