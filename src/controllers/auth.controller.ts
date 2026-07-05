@@ -4,6 +4,8 @@ import { comparePassword, hashPassword } from "../utils/bcrypt.utlis";
 import appError from "../utils/appError.utils";
 
 //*  register
+
+//create
 export const register = async (
   req: Request,
   res: Response,
@@ -50,7 +52,7 @@ export const login=async(req:Request,res:Response,next:NextFunction)=>{
     if(!email) throw new appError("Email is required",400);
     if(!password) throw new appError("password is required",400);
 
-    const user=await User.findOne({email:email});
+    const user=await User.findOne({email:email}).select("+password");
     if(!user){
       throw new appError("credentials doesnot match",400);
     }

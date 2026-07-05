@@ -3,6 +3,7 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 
 //! importing routes
 import authRoutes from "./routes/auth.routes";
+import userRoutes from "./routes/user.routes";
 // @types_packageName -> npm i -D  @types_packageName
 //* creating app instances
 const app = express();
@@ -22,7 +23,7 @@ app.get("/", (req: Request, res: Response, next: NextFunction) => {
 
 //! using routes
 app.use("/api/v1/auth", authRoutes);
-
+app.use("/api/v1/auth",userRoutes);
 //! path not found
 app.use((req: Request, res: Response, next: NextFunction) => {
   const message = `Cannot ${req.method} on ${req.path}`;
