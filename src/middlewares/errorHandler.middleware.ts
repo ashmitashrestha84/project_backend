@@ -1,11 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-export const errorHandler=(
-    error:any,
-    req:Request, 
-    res:Response, 
-    next:NextFunction,
-)=>{
+export const errorHandler=(error:any,req:Request, res:Response, next:NextFunction,)=>{
     console.log(error);
     const message=error?.message ?? "Internal Server Error";
     let status=error?.status ?? "error";

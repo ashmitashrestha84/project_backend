@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import User from "../models/user.model";
-import { hashPassword } from "../utils/bcrypt.utlis";
+import { comparePassword, hashPassword } from "../utils/bcrypt.utlis";
 import appError from "../utils/appError.utils";
 
 //*  register
@@ -19,7 +19,6 @@ export const register = async (
     throw new appError('full_name is required',400); 
     }
     if (!email) throw new appError('email is required',400);
-    
     if (!password) {
     throw new appError('password is required',400);
     }
@@ -44,6 +43,36 @@ export const register = async (
 };
 
 //* login
+
+export const login=async(req:Request,res:Response,next:NextFunction)=>{
+  try{
+    const {email,password}=req.body;
+    if(!email) throw new appError("Email is required",400);
+    if(!password) throw new appError("password is required",400);
+
+    const user=await User.findOne({email:email});
+    if(!user){
+      throw new appError("credentials doesnot match",400);
+    }
+
+    //* compare password
+    const isPassmatched=await comparePassword(password,user.password);
+    if(!isPassmatched){
+      throw new appError("credentials not matched",400);
+    }
+  //* success response
+
+  res.status(201).json({
+    message:"login success",
+    status:"success",
+    success:true,
+    data:user
+  })
+}
+  catch(error){
+    next(error);
+  }
+}
 
 //* get profile
 
