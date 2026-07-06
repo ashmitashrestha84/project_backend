@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import User from "../models/user.model";
 import appError from "../utils/appError.utils";
+import { catchAsync } from "../utils/catchAsync.utils";
 
 //!get all Users
-export const getAll=async(req:Request,res:Response,next:NextFunction)=>{
-        try{
+export const getAll=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
             const users=await User.find({role:'USER'})
             res.status(201).json({
                 message:"User fetched",
@@ -12,15 +12,10 @@ export const getAll=async(req:Request,res:Response,next:NextFunction)=>{
                 success:true,
                 data:users,
             })
-        }
-        catch(error){
-            next(error)
-        }
-}
+})
 
 //!get all admins
-export const getAllAdmins=async(req:Request,res:Response,next:NextFunction)=>{
-        try{
+export const getAllAdmins=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
             // const admins=await User.find({role:"ADMIN"})
             const admins=await User.find({role:{$in:["ADMIN","SUPERADMIN"]}})
             res.status(201).json({
@@ -29,17 +24,12 @@ export const getAllAdmins=async(req:Request,res:Response,next:NextFunction)=>{
                 success:true,
                 data:admins,
             })
-        }
-        catch(error){
-            next(error)
-        }
-}
+        });
 
 
 
 //!getbyID
-export const getbyId=async(req:Request,res:Response,next:NextFunction)=>{
-    try{
+export const getbyId=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
         const {id}=req.params;
         const users=await User.findOne({_id:id});
         if(!users){
@@ -51,8 +41,4 @@ export const getbyId=async(req:Request,res:Response,next:NextFunction)=>{
             status:"success",
             data:users,
         })
-    }
-catch(error){
-    next(error)
-}
-}
+})

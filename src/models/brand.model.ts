@@ -6,6 +6,7 @@ const brandSchema= new mongoose.Schema({
         type:String,
         required:[true,"name is required here"],
         minLength:[3,"length must be greater than 3"],
+        unique:true,
         trim:true,
     },
     description:{
