@@ -4,7 +4,6 @@ import { comparePassword, hashPassword } from "../utils/bcrypt.utlis";
 import appError from "../utils/appError.utils";
 
 //*  register
-
 //create
 export const register = async (
   req: Request,
