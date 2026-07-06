@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      require: false,
+      required: false,
       maxLength: [10, "phone number at most be 10 digits long"],
     },
   },

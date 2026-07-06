@@ -4,13 +4,13 @@ import mongoose from "mongoose";
 const brandSchema= new mongoose.Schema({
     name:{
         type:String,
-        requires:[true,"name is required here"],
+        required:[true,"name is required here"],
         minLength:[3,"length must be greater than 3"],
         trim:true,
     },
     description:{
         type:String,
-        requires:[true,"description is required"],
+        required:[true,"description is required"],
         minLength:[10,"length must be greater than 10"],
         trim:true,
     },

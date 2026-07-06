@@ -52,7 +52,7 @@ export const getById = async (
 ) => {
   try {
     const {id} = req.params;
-    const brand = await Brand.findOne({id:id});
+    const brand = await Brand.findOne({_id:id});
     if (!brand) throw new appError("Brand not found", 404);
     res.status(200).json({
       message: "Brand fetched successfully",
@@ -72,8 +72,8 @@ export const update = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
-    const brand = await Brand.findOne({id:id}, req.body, {
+    const {id} = req.params;
+    const brand = await Brand.findOneAndUpdate({_id:id}, req.body, {
       new: true,
       runValidators: true,
     });
@@ -96,8 +96,8 @@ export const remove = async (
   next: NextFunction
 ) => {
   try {
-    const { id } = req.params;
-    const brand = await Brand.findOne({id:id});
+    const {id} = req.params;
+    const brand = await Brand.findOneAndDelete({_id:id});
     if (!brand)throw new appError("Brand not found", 404);
     res.status(200).json({
       message: "Brand deleted successfully",

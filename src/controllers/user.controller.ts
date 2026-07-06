@@ -41,7 +41,7 @@ export const getAllAdmins=async(req:Request,res:Response,next:NextFunction)=>{
 export const getbyId=async(req:Request,res:Response,next:NextFunction)=>{
     try{
         const {id}=req.params;
-        const users=await User.findOne({id:id});
+        const users=await User.findOne({_id:id});
         if(!users){
             throw new appError("user not found",404)
         }

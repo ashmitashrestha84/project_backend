@@ -2,15 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import User from "../models/user.model";
 import { comparePassword, hashPassword } from "../utils/bcrypt.utlis";
 import appError from "../utils/appError.utils";
-
+import { catchAsync } from "../utils/catchAsync.utils";
 //*  register
 //create
-export const register = async (
+export const register = catchAsync(async (
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  try {
     const { full_name, email, password, phone } = req.body;
     if (!full_name) {
     //   const error: any = new Error("fullname is required");
@@ -38,15 +37,11 @@ export const register = async (
       status: "success",
       data: user,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+});
 
 //* login
 
-export const login=async(req:Request,res:Response,next:NextFunction)=>{
-  try{
+export const login=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const {email,password}=req.body;
     if(!email) throw new appError("Email is required",400);
     if(!password) throw new appError("password is required",400);
@@ -69,11 +64,8 @@ export const login=async(req:Request,res:Response,next:NextFunction)=>{
     success:true,
     data:user
   })
-}
-  catch(error){
-    next(error);
-  }
-}
+})
+
 
 //* get profile
 
