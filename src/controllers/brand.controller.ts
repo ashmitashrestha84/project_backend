@@ -1,10 +1,10 @@
 import { Request,Response, NextFunction } from "express";
 import Brand from "../models/brand.model";
 import appError from "../utils/appError.utils";
+import { catchAsync } from "../utils/catchAsync.utils";
 
 // createBrand()
-export const create=async(req:Request,res:Response,next:NextFunction)=>{
-    try{
+export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const {name,description}=req.body;
     if(!name) throw new appError("name is required",404);
     if(!description) throw new appError("description is required",404);
@@ -20,37 +20,29 @@ export const create=async(req:Request,res:Response,next:NextFunction)=>{
       data: brand,
     });
 }
-catch(error)
-{
-    next(error);
-}}
+);
 
-export const getAll = async (
+export const getAll = catchAsync(async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  try {
     const brands = await Brand.find();
-
     res.status(200).json({
       message: "Brands fetched successfully",
       success: true,
       status: "success",
       data: brands,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+ })
+
 
 // Get Brand By ID
-export const getById = async (
+export const getById = catchAsync(async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  try {
     const {id} = req.params;
     const brand = await Brand.findOne({_id:id});
     if (!brand) throw new appError("Brand not found", 404);
@@ -60,18 +52,14 @@ export const getById = async (
       status: "success",
       data: brand,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+  });
 
 // Update Brand
-export const update = async (
+export const update = catchAsync(async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  try {
     const {id} = req.params;
     const brand = await Brand.findOneAndUpdate({_id:id}, req.body, {
       new: true,
@@ -84,28 +72,20 @@ export const update = async (
       status: "success",
       data: brand,
     });
-  } catch (error) {
-    next(error);
-  }
-};
-
+});
 // Delete Brand
-export const remove = async (
+export const remove = catchAsync(async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  try {
     const {id} = req.params;
     const brand = await Brand.findOneAndDelete({_id:id});
-    if (!brand)throw new appError("Brand not found", 404);
+    if (!brand) throw new appError("Brand not found", 404);
     res.status(200).json({
       message: "Brand deleted successfully",
       success: true,
       status: "success",
       data: null,
     });
-  } catch (error) {
-    next(error);
-  }
-};
+  });
