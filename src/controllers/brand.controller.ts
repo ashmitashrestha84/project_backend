@@ -8,6 +8,10 @@ export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)
     const {name,description}=req.body;
     if(!name) throw new appError("name is required",404);
     if(!description) throw new appError("description is required",404);
+    const existingBrand= await Brand.findOne({name});
+     if (existingBrand) {
+      throw new appError("Brand already exists", 409);
+    }
     const brand =new Brand({name,description});
         //!save user
     await brand.save();
