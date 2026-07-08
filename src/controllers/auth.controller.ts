@@ -11,6 +11,8 @@ export const register = catchAsync(async (
   next: NextFunction,
 ) => {
     const { full_name, email, password, phone } = req.body;
+    const file=req.file;
+    console.log(file);
     if (!full_name) {
     //   const error: any = new Error("fullname is required");
     //   error.StatusCode = 404;
