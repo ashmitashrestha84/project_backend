@@ -5,7 +5,7 @@ import { Request } from "express";
 
 
 export const uploader=()=>{
-    const folder="uploads/";
+    const folder="uploads/";   //create the folder
     const file_size= 5 *1024 * 1024; //5MB
     
 
@@ -20,8 +20,10 @@ export const uploader=()=>{
             cb(null,folder);
         },
         filename:(req,file,cb)=>{
-            const uniqueSuffix=Date.now()+"-"+Math.round(Math.random()*1e9);
-            cb(null,file.fieldname+"-"+uniqueSuffix+"-"+file.originalname);
+            // const uniqueSuffix=Date.now()+"-"+Math.round(Math.random()*1e9);
+            // cb(null,file.fieldname+"-"+uniqueSuffix+"-"+file.originalname);
+            const file_name=Date.now()+"-" +file.originalname;
+            cb(null,file_name);
         }
     })
 
