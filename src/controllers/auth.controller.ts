@@ -3,6 +3,10 @@ import User from "../models/user.model";
 import { comparePassword, hashPassword } from "../utils/bcrypt.utlis";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
+import { upload } from "../utils/cloudinary.utlis";
+
+const uploadFolder="/profile_images";
+
 //*  register
 //create
 export const register = catchAsync(async (
@@ -29,6 +33,18 @@ export const register = catchAsync(async (
     //* hash password
     const hashPass = await hashPassword(password);
     user.password = hashPass;
+
+    //* handle profile image
+    if(file){
+      //* upload to clodinary
+      const {path,public_id} = await upload(file,uploadFolder);
+
+      user.profile_image={
+        path,
+        public_id,
+      }
+
+    }
     //!save user
     await user.save();
 

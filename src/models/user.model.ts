@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Role } from "../types/enumtypes";
+import imageSchema from "./image.model";
 
 //* user schema
 const userSchema = new mongoose.Schema(
@@ -27,8 +28,9 @@ const userSchema = new mongoose.Schema(
       default: Role.USER,
     },
     profile_image: {
-      type: String,
-    },
+      type:imageSchema,
+      default:null,
+  },
     phone: {
       type: String,
       required: false,
