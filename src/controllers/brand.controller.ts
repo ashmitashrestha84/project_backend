@@ -2,9 +2,12 @@ import { Request,Response, NextFunction } from "express";
 import Brand from "../models/brand.model";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
+import { upload } from "../utils/cloudinary.utlis";
+const uploadFolder="/brands";
 
 // createBrand()
 export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+  const file=req.file;
     const {name,description}=req.body;
     if(!name) throw new appError("name is required",404);
     if(!description) throw new appError("description is required",404);
@@ -13,6 +16,16 @@ export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)
       throw new appError("Brand already exists", 409);
     }
     const brand =new Brand({name,description});
+    
+    if(file){
+      const {path,public_id}=await upload(file, uploadFolder);
+      brand.logo={
+        path,
+        public_id,
+      }
+    }
+    
+
         //!save user
     await brand.save();
 
