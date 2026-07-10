@@ -1,5 +1,6 @@
 //name,description,logo
 import mongoose from "mongoose";
+import imageSchema from "./image.model";
 
 const brandSchema= new mongoose.Schema({
     name:{
@@ -16,7 +17,8 @@ const brandSchema= new mongoose.Schema({
         trim:true,
     },
     logo:{
-        type: String,
+        type:imageSchema,
+        default:null,
     }
 
 },{ timestamps: true })

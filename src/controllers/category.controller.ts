@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import Category from "../models/category.model";
 import { catchAsync } from "../utils/catchAsync.utils";
 import AppError from "../utils/appError.utils";
+import { upload } from "../utils/cloudinary.utlis";
+const uploadFolder="/categories";
 
 
 export const getAll = catchAsync(
@@ -37,6 +39,7 @@ export const getById = catchAsync(
 
 export const create = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const file=req.file;
     const { name, description } = req.body;
 
     if (!name) throw new AppError("name is required", 404);
@@ -47,9 +50,16 @@ export const create = catchAsync(
       throw new AppError("name already exists", 404);
     }
 
-    const category = new Category({ name, description });
-    await category.save();
+const category = new Category({ name, description });
+if (file) {
+  const { path, public_id } = await upload(file, uploadFolder);
+  category.logo = {
+    path,
+    public_id,
+  };
+}
 
+await category.save();
     res.status(201).json({
       message: "Category created successfully",
       status: "success",
