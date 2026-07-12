@@ -31,28 +31,28 @@ export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)
     await brand.save();
 
     //* success response
-    const {...rest}=brand.toObject();
-
-    //* success response
-    sendResponse(res,{
-      message:"Brand created",
-      statusCode:201,
-      data:rest,
-    })
-});
+    res.status(201).json({
+      message: "Brand registered",
+      success: true,
+      status: "success",
+      data: brand,
+    });
+}
+);
 
 export const getAll = catchAsync(async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-    const brands = await Brand.find();
-    res.status(200).json({
-      message: "Brands fetched successfully",
-      success: true,
-      status: "success",
-      data: brands,
-    });
+    const brand = await Brand.find();
+//.lean
+    //* success response
+    sendResponse(res,{
+      message:"Brand created",
+      statusCode:201,
+      data:brand,
+    })
  })
 
 

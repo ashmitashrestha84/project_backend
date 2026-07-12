@@ -3,12 +3,12 @@ import User from "../models/user.model";
 import { comparePassword, hashPassword } from "../utils/bcrypt.utlis";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
-import { upload } from "../utils/cloudinary.utlis";
+import { deleteFile, upload } from "../utils/cloudinary.utlis";
 import { generateJwtToken } from "../utils/jwt.utils";
 import { IJwtPayload } from "../types/globaltypes";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utlis";
-import { send } from "process";
+import app from "../app";
 
 const uploadFolder="/profile_images";
 
@@ -125,7 +125,41 @@ export const login = catchAsync(
 })
 
 
+//* logout
+
 //* get profile
+
+//* change profile image
+export const changeProfileImage= catchAsync(async(req: Request,res:Response,next:NextFunction)=>{
+    const {_id}=req.user;
+    const file=req.file;
+    if(!file){
+      throw new appError("profile_image is required",400);
+    }
+    const user = await User.findOne({_id:_id});
+    if(!user){
+      throw new appError("Profile not found",400);
+    }
+
+    //!delete old Image
+   if(user.profile_image && user.profile_image.public_id){
+     await deleteFile(user.profile_image.public_id);
+   }
+
+    const {path, public_id}= await upload(file,uploadFolder);
+    user.profile_image={
+      path,
+      public_id,
+    }
+
+    //* send success response
+    sendResponse(res,{
+      message:"Profile Image updated",
+      statusCode:200,
+      data:user,
+    })
+
+})
 
 //* change password
 

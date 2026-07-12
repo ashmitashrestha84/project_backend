@@ -6,6 +6,7 @@ import { Role } from "../types/enumtypes";
 import appError from "../utils/appError.utils";
 import { verifyJwtToken } from "../utils/jwt.utils";
 import ENV_CONFIG from "../config/env.config";
+import { decode } from "jsonwebtoken";
 
 
 export const authenticate=(role?:Role[])=>{
@@ -48,7 +49,11 @@ export const authenticate=(role?:Role[])=>{
             if(role && role.length>0 && !role.includes(decoded_data.role)){
                 throw new appError("unauthorized.Access denied",401);
             }
-
+            req.user={
+                _id:decoded_data._id,
+                email:decoded_data.email,
+                role:decoded_data.role,
+            }
 
             next();
         }catch(error){
