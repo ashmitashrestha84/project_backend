@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
+import cookieParser from "cookie-parser";
 
 //! importing routes
 import routes from "./routes"    //index may or maynot be written
@@ -11,6 +12,7 @@ const app = express();
 
 //! using middlewares
 app.use(express.json({ limit: "10mb" }));
+app.use(cookieParser());
 
 //* health routes
 app.get("/", (req: Request, res: Response, next: NextFunction) => {

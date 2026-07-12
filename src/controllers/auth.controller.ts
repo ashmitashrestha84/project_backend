@@ -8,6 +8,7 @@ import { generateJwtToken } from "../utils/jwt.utils";
 import { IJwtPayload } from "../types/globaltypes";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utlis";
+import { send } from "process";
 
 const uploadFolder="/profile_images";
 
@@ -52,13 +53,15 @@ export const register = catchAsync(async (
     //!save user
     await user.save();
 
+    //* converting mongoose doc to js object
+    const {password:user_pass,...rest}=user.toObject();
+
     //* success response
-    res.status(201).json({
-      message: "Account registered",
-      success: true,
-      status: "success",
-      data: user,
-    });
+    sendResponse(res,{
+      message:"Account created",
+      statusCode:201,
+      data:rest,
+    })
 });
 
 //* login

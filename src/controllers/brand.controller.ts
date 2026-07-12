@@ -3,6 +3,7 @@ import Brand from "../models/brand.model";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { upload } from "../utils/cloudinary.utlis";
+import { sendResponse } from "../utils/sendResponse.utlis";
 const uploadFolder="/brands";
 
 // createBrand()
@@ -30,14 +31,15 @@ export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)
     await brand.save();
 
     //* success response
-    res.status(201).json({
-      message: "Brand registered",
-      success: true,
-      status: "success",
-      data: brand,
-    });
-}
-);
+    const {...rest}=brand.toObject();
+
+    //* success response
+    sendResponse(res,{
+      message:"Brand created",
+      statusCode:201,
+      data:rest,
+    })
+});
 
 export const getAll = catchAsync(async (
   req: Request,
