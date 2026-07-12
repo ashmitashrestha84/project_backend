@@ -4,6 +4,10 @@ import { comparePassword, hashPassword } from "../utils/bcrypt.utlis";
 import appError from "../utils/appError.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { upload } from "../utils/cloudinary.utlis";
+import { generateJwtToken } from "../utils/jwt.utils";
+import { IJwtPayload } from "../types/globaltypes";
+import ENV_CONFIG from "../config/env.config";
+import { sendResponse } from "../utils/sendResponse.utlis";
 
 const uploadFolder="/profile_images";
 
@@ -58,30 +62,63 @@ export const register = catchAsync(async (
 });
 
 //* login
-
-export const login=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
-    const {email,password}=req.body;
-    if(!email) throw new appError("Email is required",400);
-    if(!password) throw new appError("password is required",400);
-
-    const user=await User.findOne({email:email}).select("+password");
-    if(!user){
-      throw new appError("credentials doesnot match",400);
+export const login = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // email , password
+    const { email, password } = req.body;
+    if (!email) {
+      throw new appError("email is required", 400);
     }
-
+    if (!password) {
+      throw new appError("password is required", 400);
+    }
+    //* find user by email
+    const user = await User.findOne({ email: email }).select("+password");
+    if (!user) {
+      throw new appError("credentials does not matched", 400);
+    }
     //* compare password
-    const isPassmatched=await comparePassword(password,user.password);
-    if(!isPassmatched){
-      throw new appError("credentials not matched",400);
+    const isPassMatched = await comparePassword(password, user.password);
+
+    if (!isPassMatched) {
+      throw new appError("credentials does not matched", 400);
     }
+    //* jwt token
+    const payload:IJwtPayload={
+      _id:user._id,
+      email:user.email,
+      role:user.role,
+    }
+    const access_token=generateJwtToken(payload)
+    res.cookie('access_token',access_token,{
+      httpOnly:ENV_CONFIG.NODE_ENV==="development" ? false:true,  //production->true  development->false
+      secure:ENV_CONFIG.NODE_ENV==="development" ? false:true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      sameSite:ENV_CONFIG.NODE_ENV==="development" ? "lax":"none",   //production->none    
+    })
+
+
+
+      const {password:p, ...rest}=user.toObject();
   //* success response
 
-  res.status(201).json({
-    message:"login success",
-    status:"success",
-    success:true,
-    data:user
-  })
+    sendResponse(res, {
+      statusCode: 200,
+      message: "Login User",
+      data: {
+        user:rest,
+        access_token,
+      },
+    });
+  // res.status(201).json({
+  //   message:"login success",
+  //   status:"success",
+  //   success:true,
+  //   data:{
+  //     user,
+  //     access_token,
+  //   }
+  // })
 })
 
 
