@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { Role } from "./enumtypes";
 
-//export interface IImage{
-// path:string,
-// public_id:string
-//}
+export interface IImage{
+path:string,
+public_id:string
+}
 
 export interface IJwtPayload{
     _id:mongoose.Types.ObjectId,

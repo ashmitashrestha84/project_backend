@@ -6,7 +6,6 @@ import { Role } from "../types/enumtypes";
 import appError from "../utils/appError.utils";
 import { verifyJwtToken } from "../utils/jwt.utils";
 import ENV_CONFIG from "../config/env.config";
-import { decode } from "jsonwebtoken";
 
 
 export const authenticate=(role?:Role[])=>{
@@ -19,7 +18,7 @@ export const authenticate=(role?:Role[])=>{
             // cookies(more secure to store token and permanent kindof),session(for a particular session)
             
             const cookies=req.cookies;
-            const access_token=cookies["access token"];
+            const access_token=cookies["access_token"];
             console.log(access_token);
             
             if(!access_token){

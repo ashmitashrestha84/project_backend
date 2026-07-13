@@ -3,6 +3,7 @@ import Category from "../models/category.model";
 import { catchAsync } from "../utils/catchAsync.utils";
 import AppError from "../utils/appError.utils";
 import { upload } from "../utils/cloudinary.utlis";
+import { sendResponse } from "../utils/sendResponse.utlis";
 const uploadFolder="/categories";
 
 
@@ -89,11 +90,10 @@ export const update = catchAsync(
       { new: true },
     );
 
-    res.status(201).json({
-      success: true,
+    sendResponse(res,{
       message: "Brand updated successfully.",
-      data: updatedCategory,
-    });
+      statusCode:200,
+      data: updatedCategory,})
   },
 );
 

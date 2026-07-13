@@ -8,7 +8,6 @@ import { generateJwtToken } from "../utils/jwt.utils";
 import { IJwtPayload } from "../types/globaltypes";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utlis";
-import app from "../app";
 
 const uploadFolder="/profile_images";
 
