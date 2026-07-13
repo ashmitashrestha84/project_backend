@@ -1,4 +1,4 @@
-import mongoose, {Schema } from "mongoose";
+import mongoose from "mongoose";
 import imageSchema from "./image.model";
 
 // export interface IProduct extends Document{  //tells the typescript that the object has mongoose document
