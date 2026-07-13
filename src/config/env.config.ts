@@ -26,6 +26,7 @@ const ENV_CONFIG={
     SMTP_PORT:Number(process.env.SMTP_PORT ?? "587"),
     SMTP_USER:process.env.SMTP_USER,
     SMTP_PASS:process.env.SMTP_PASS,
+    SMTP_MAIL_FROM:process.env.SMTP_MAIL_FROM,
 
 
 };
