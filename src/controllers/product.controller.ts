@@ -86,11 +86,7 @@ export const update=catchAsync(async(req:Request,res:Response,next:NextFunction)
 })
 
 //* Delete
-export const remove = catchAsync(async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const remove = catchAsync(async (req: Request,res: Response,next: NextFunction) => {
     const {id} = req.params;
     const product = await Product.findOneAndDelete({_id:id});
     if (!product) throw new appError("Product not found", 404);
@@ -101,3 +97,15 @@ export const remove = catchAsync(async (
       data: null,
     });
   });
+
+
+  //* get by category
+
+
+  //* get by brand
+
+
+  //* get new_arrival
+
+
+  //* get featured

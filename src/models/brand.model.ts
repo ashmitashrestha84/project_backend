@@ -2,9 +2,9 @@
 import mongoose, { Schema } from "mongoose";
 import imageSchema from "./image.model";
 
-export interface IBrand extends Document {
+export interface IBrand extends Document {   //tells the typescript that the object has mongoose document
   name: string;
-  description?: string;
+  description?: string;//returns the data into object and we can use object to modify the data
   logo: {
     path: string;
     public_id: string;

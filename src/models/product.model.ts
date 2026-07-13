@@ -1,20 +1,6 @@
 import mongoose from "mongoose";
 import imageSchema from "./image.model";
-
-// export interface IProduct extends Document{  //tells the typescript that the object has mongoose document
-//     name:String,
-//     description:String, //returns the data into object and we can use object to modify the data
-//     price:Number,
-//     product_image:{
-//         path:string,
-//         public_id:string,
-//     },
-//     images:[{
-//         path:string,
-//         public_id:string,
-//     }]|null;
-// }
-
+import { VirtualType } from "mongoose";
 
 const productSchema= new mongoose.Schema({
     name:{
@@ -53,7 +39,15 @@ const productSchema= new mongoose.Schema({
     images:[{
         type:imageSchema,
         default:null,
-    }]
+    }],
+    new_arrival:{
+        type:Boolean,
+        default:false,
+    },
+    is_featured:{
+        type:Boolean,
+        default:false,
+    },
     },
     {timestamps:true}
 )
