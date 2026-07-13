@@ -8,6 +8,7 @@ import { generateJwtToken } from "../utils/jwt.utils";
 import { IJwtPayload } from "../types/globaltypes";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utlis";
+import { sendEmail } from "../utils/emailService.utils";
 
 const uploadFolder="/profile_images";
 
@@ -51,6 +52,19 @@ export const register = catchAsync(async (
     }
     //!save user
     await user.save();
+
+
+    //email template
+
+    //* send account created email
+     sendEmail({
+      to:user.email,
+      subject:"Account Created",
+      html:`<div>
+      <h2>Account created<h2>
+      <p> Hello ${user.full_name},welcome to our service</p>
+      </div>`,
+    })
 
     //* converting mongoose doc to js object
     const {password:user_pass,...rest}=user.toObject();
