@@ -38,9 +38,10 @@ export const getById=catchAsync(async(req:Request,res:Response,next:NextFunction
 //* create
 export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const file=req.file;
-    const {name,description}=req.body;
+    const {name,price,description}=req.body;
     if(!name) throw new appError("Name is required",404);
     if(!description) throw new appError("Description is required",404);
+    if(!price) throw new appError("price is required",404);
 
     const existingname= await Product.findOne({name})
     if(existingname) throw new appError("Name already exists",404);
@@ -65,9 +66,10 @@ export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)
 
 export const update=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const {id}=req.params;
-    const {name,description}=req.body;
+    const {name,price,description}=req.body;
        if(!name) throw new appError("Name is required",404);
         if(!description) throw new appError("Description is required",404);
+        if(!price) throw new appError("price is required",404);
 
     const product=await Product.findByIdAndUpdate({_id:id},req.body,{
         new:true,

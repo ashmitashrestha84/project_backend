@@ -1,6 +1,7 @@
 import express from "express";
 import { register,login, changeProfileImage } from "../controllers/auth.controller";
 import { uploader } from "../middlewares/multer.middleware";
+import { authenticate } from "../middlewares/auth.middleware";
 
 const router = express.Router();
 
@@ -14,9 +15,13 @@ router.post("/login",login);
 
 
 //* get profile
+//router.get("/me",profile)
 
 //* change profile_Image
-router.post("/change_profile_image",changeProfileImage);
+router.post("/profile-image",upload.single("profile_image"),authenticate(),changeProfileImage);
+
+//*logout
+//router.post("/logout",logout)
 
 //* change password
 

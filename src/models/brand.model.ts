@@ -1,8 +1,17 @@
 //name,description,logo
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import imageSchema from "./image.model";
 
-const brandSchema= new mongoose.Schema({
+export interface IBrand extends Document {
+  name: string;
+  description?: string;
+  logo: {
+    path: string;
+    public_id: string;
+  } | null;
+}
+
+const brandSchema= new Schema<IBrand>({
     name:{
         type:String,
         required:[true,"name is required here"],
@@ -22,5 +31,5 @@ const brandSchema= new mongoose.Schema({
     }
 
 },{ timestamps: true })
-const Brand=mongoose.model("brand",brandSchema);
+const Brand=mongoose.model<IBrand>("brand",brandSchema);
 export default Brand;
