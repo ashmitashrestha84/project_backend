@@ -37,24 +37,44 @@ export const getById=catchAsync(async(req:Request,res:Response,next:NextFunction
 
 //* create
 export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
-    const file=req.file;
-    const {name,price,description}=req.body;
+    const files=req.files as {
+        product_image?:Express.Multer.File[],
+        images?: Express.Multer.File[],
+    };
+    const {name,price,description,category,brand}=req.body;
     if(!name) throw new appError("Name is required",404);
     if(!description) throw new appError("Description is required",404);
     if(!price) throw new appError("price is required",404);
+    if (!brand) throw new appError("Brand is required", 400);
+    if (!category) throw new appError("Category is required", 400);
 
-    const existingname= await Product.findOne({name})
-    if(existingname) throw new appError("Name already exists",404);
+        const existingProduct = await Product.findOne({ name });
 
-    const product= new Product({name,description})
+        if (existingProduct) {
+            throw new appError("Product already exists", 409);
+        }
 
-     if(file){
-        const {path,public_id}= await upload(file,uploadFolder);
+        const product = new Product({
+            name,
+            description,
+            price,
+            brand,
+            category,
+        });
+
+     if(files.product_image?.length){
+        const {path,public_id}= await upload(files.product_image[0],uploadFolder);
      product.product_image={
         path,
         public_id,
      }
     }
+   if (files.images?.length){ 
+    for (const file of files.images) { 
+        const { path, public_id } = await upload(file, uploadFolder); 
+        product.images.push({ path, public_id, }); 
+    } 
+}   
     await product.save;
 
     sendResponse(res,{
@@ -90,22 +110,82 @@ export const remove = catchAsync(async (req: Request,res: Response,next: NextFun
     const {id} = req.params;
     const product = await Product.findOneAndDelete({_id:id});
     if (!product) throw new appError("Product not found", 404);
-    res.status(200).json({
+    sendResponse(res,{
       message: "Product deleted successfully",
-      success: true,
-      status: "success",
-      data: null,
-    });
+      statusCode:200,
+      data: product,
+});
   });
 
 
   //* get by category
+  export const getByCategory = catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+    const {id}=req.params;
+    const category= await Product.findOne({category:id}).populate("category");
+    if(!category){
+        throw new appError("Category ID not found",404);
+    }
+    
+        sendResponse(res, {
+            statusCode: 200,
+            message: "Product fetched successfully",
+            data: category,
+        });
+  })
 
 
   //* get by brand
+    export const getByBrand = catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+    const {id}=req.params;
+    const brand= await Product.findOne({brand:id}).populate("brand");
+    if(!brand){
+        throw new appError("Brand ID not found",404);
+    }
+    
+        sendResponse(res, {
+            statusCode: 200,
+            message: "Product fetched successfully",
+            data: brand,
+        });
+  })
+
 
 
   //* get new_arrival
+  export const getNewArrivals = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const products = await Product.find()
+            .sort({ createdAt: -1 }) // newest first
+            .populate("brand")
+            .populate("category");
+        if (products.length === 0) {
+            throw new appError("No products found", 404);
+        }
+        sendResponse(res, {
+            statusCode: 200,
+            message: "New arrivals fetched successfully",
+            data: products,
+        });
+    }
+);
 
 
   //* get featured
+  export const getFeatured = catchAsync(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const products = await Product.find({
+            isFeatured: true,
+        })
+            .populate("brand")
+            .populate("category");
+
+        if (products.length === 0) {
+            throw new appError("No featured products found", 404);
+        }
+        sendResponse(res, {
+            statusCode: 200,
+            message: "Featured products fetched successfully",
+            data: products,
+        });
+    }
+);

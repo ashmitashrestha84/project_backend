@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import imageSchema from "./image.model";
-import { VirtualType } from "mongoose";
 
 const productSchema= new mongoose.Schema({
     name:{

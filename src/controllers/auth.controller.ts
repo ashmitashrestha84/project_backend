@@ -9,6 +9,7 @@ import { IJwtPayload } from "../types/globaltypes";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utlis";
 import { sendEmail } from "../utils/emailService.utils";
+import { accountCreatedHtml,newLoginDetectedHtml } from "../utils/emailTemplate.utils";
 
 const uploadFolder="/profile_images";
 
@@ -60,10 +61,11 @@ export const register = catchAsync(async (
      sendEmail({
       to:user.email,
       subject:"Account Created",
-      html:`<div>
-      <h2>Account created<h2>
-      <p> Hello ${user.full_name},welcome to our service</p>
-      </div>`,
+      html:accountCreatedHtml({
+        full_name:user.full_name,
+        email:user.email,
+        createdAt:user.createdAt,
+      })
     })
 
     //* converting mongoose doc to js object
@@ -99,6 +101,18 @@ export const login = catchAsync(
     if (!isPassMatched) {
       throw new appError("credentials does not matched", 400);
     }
+
+         sendEmail({
+      to:user.email,
+      subject:"Account Created",
+      html:newLoginDetectedHtml({
+        full_name:user.full_name,
+        email:user.email,
+        loginTime:new Date(Date.now()),
+        device:req.headers["user-agent"]!!,
+      })
+    })
+
     //* jwt token
     const payload:IJwtPayload={
       _id:user._id,
