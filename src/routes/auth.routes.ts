@@ -2,16 +2,18 @@ import express from "express";
 import { register,login, changeProfileImage } from "../controllers/auth.controller";
 import { uploader } from "../middlewares/multer.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
+import { validate } from "../middlewares/validator.middleware";
+import { loginUserSchema, registerUserSchema } from "../validators/auth.validator";
 
 const router = express.Router();
 
 const upload= uploader();
 
 //* register
-router.post("/register",upload.single("profile_image"), register);
+router.post("/register",upload.single("profile_image"),validate(registerUserSchema), register);
 
 //* login
-router.post("/login",login);
+router.post("/login",validate(loginUserSchema),login);
 
 
 //* get profile

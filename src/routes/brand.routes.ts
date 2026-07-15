@@ -2,7 +2,7 @@ import express from "express";
 import { getAll,getById,create,update,remove } from "../controllers/brand.controller";
 import { uploader } from "../middlewares/multer.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
-import { All_Admin } from "../types/enumtypes";
+import { All_Admin} from "../types/enumtypes";
 const router=express.Router();
 
 const upload=uploader();

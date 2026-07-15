@@ -37,21 +37,14 @@ export const getById=catchAsync(async(req:Request,res:Response,next:NextFunction
 
 //* create
 export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
-    const files=req.files as {
+    const {product_image,images}=req.files as {
         product_image?:Express.Multer.File[],
         images?: Express.Multer.File[],
     };
-    const {name,price,description,category,brand}=req.body;
-    if(!name) throw new appError("Name is required",404);
-    if(!description) throw new appError("Description is required",404);
-    if(!price) throw new appError("price is required",404);
-    if (!brand) throw new appError("Brand is required", 400);
-    if (!category) throw new appError("Category is required", 400);
+    const {name,price,description,category,brand,new_arrival,is_featured}=req.body;
 
-        const existingProduct = await Product.findOne({ name });
-
-        if (existingProduct) {
-            throw new appError("Product already exists", 409);
+     if(!product_image || !product_image[0]){
+            throw new appError("product image is required",400)
         }
 
         const product = new Product({
@@ -60,22 +53,38 @@ export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)
             price,
             brand,
             category,
+            new_arrival,
+            is_featured,
         });
 
-     if(files.product_image?.length){
-        const {path,public_id}= await upload(files.product_image[0],uploadFolder);
-     product.product_image={
+       
+
+
+    const {path,public_id}= await upload(product_image[0],uploadFolder);
+      product.product_image={
         path,
         public_id,
-     }
+      }
+
+
+//Promise.all(arr_promise)   // all promise must be fulfilled
+//Promise.all(arr_promise)    //all promise must be settled may or maynot be fulfilled
+//Promise.race(arr_promise)   //gives result of first fulfilled promise
+//Promise.any(arr_promise)
+
+      if(images && images.length>0){
+        const promises=images.map(file=>upload(file,uploadFolder)) 
+            const files= await Promise.allSettled(promises);
+            const fullFilled= files
+            .filter(promise=>promise.status==='fulfilled')
+            .map((img)=>img.value);
+            product.set('images',fullFilled);
     }
-   if (files.images?.length){ 
-    for (const file of files.images) { 
-        const { path, public_id } = await upload(file, uploadFolder); 
-        product.images.push({ path, public_id, }); 
-    } 
-}   
+    
     await product.save;
+      //* Populate references
+    await product.populate("brand");
+    await product.populate("category");
 
     sendResponse(res,{
         message:"Product created",

@@ -26,7 +26,7 @@ const categorySchema = new Schema<ICategory>(
     description: {
       type: String,
       trim: true,
-      minLength: 25,
+      minLength: 5,
       maxLength: 500,
     },
 

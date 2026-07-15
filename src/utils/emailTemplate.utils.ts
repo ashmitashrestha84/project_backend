@@ -1,3 +1,5 @@
+import ENV_CONFIG from "../config/env.config";
+
 const formatDate = (createdAt: NativeDate) => {
   const formattedDate = new Date(createdAt).toLocaleString("en-US", {
     dateStyle: "long",
@@ -71,7 +73,8 @@ export const accountCreatedHtml = ({
 
               <div style="text-align:center;margin:36px 0;">
                 <a
-                  href="#"
+                  href="${ENV_CONFIG.FRONT_END_URL}/auth/dashboard"
+                  target="_blank"
                   style="display:inline-block;background:#7c3aed;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:bold;"
                 >
                   Go to Dashboard
@@ -80,14 +83,14 @@ export const accountCreatedHtml = ({
 
               <p style="font-size:14px;color:#666666;">
                 Thanks,<br/>
-                <strong>Your Team</strong>
+                <strong>${ENV_CONFIG.APP_NAME}</strong>
               </p>
             </td>
           </tr>
 
           <tr>
             <td style="background:#faf5ff;padding:20px;text-align:center;font-size:12px;color:#777777;">
-              © ${new Date().getFullYear()} Your Company. All rights reserved.
+              © ${new Date().getFullYear()} ${ENV_CONFIG.APP_NAME} All rights reserved.
             </td>
           </tr>
 
@@ -182,7 +185,8 @@ export const newLoginDetectedHtml = ({
 
               <div style="text-align:center;margin:36px 0;">
                 <a
-                  href="#"
+                  href="${ENV_CONFIG.FRONT_END_URL}/auth/change-password"
+                  target="_blank"
                   style="display:inline-block;background:#7c3aed;color:#ffffff;text-decoration:none;padding:14px 30px;border-radius:8px;font-weight:bold;"
                 >
                   Change Password
@@ -195,7 +199,7 @@ export const newLoginDetectedHtml = ({
 
               <p style="font-size:14px;color:#666;margin-top:32px;">
                 Thanks,<br />
-                <strong>Your Team</strong>
+                <strong>${ENV_CONFIG.APP_NAME}</strong>
               </p>
 
             </td>
@@ -203,7 +207,7 @@ export const newLoginDetectedHtml = ({
 
           <tr>
             <td style="background:#faf5ff;padding:20px;text-align:center;font-size:12px;color:#777777;">
-              © ${new Date().getFullYear()} Your Company. All rights reserved.
+              © ${new Date().getFullYear()} ${ENV_CONFIG.APP_NAME}. All rights reserved.
             </td>
           </tr>
 

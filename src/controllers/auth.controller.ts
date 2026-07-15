@@ -23,17 +23,17 @@ export const register = catchAsync(async (
     const { full_name, email, password, phone } = req.body;
     const file=req.file;
     console.log(file);
-    if (!full_name) {
-    //   const error: any = new Error("fullname is required");
-    //   error.StatusCode = 404;
-    //   error.Status = "fail";
-    //   throw error;
-    throw new appError('full_name is required',400); 
-    }
-    if (!email) throw new appError('email is required',400);
-    if (!password) {
-    throw new appError('password is required',400);
-    }
+    // if (!full_name) {
+    // //   const error: any = new Error("fullname is required");
+    // //   error.StatusCode = 404;
+    // //   error.Status = "fail";
+    // //   throw error;
+    // throw new appError('full_name is required',400); 
+    // }
+    // if (!email) throw new appError('email is required',400);
+    // if (!password) {
+    // throw new appError('password is required',400);
+    // }
     const user = new User({ email, password, full_name, phone }); //create user
 
     //* hash password
@@ -84,12 +84,12 @@ export const login = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     // email , password
     const { email, password } = req.body;
-    if (!email) {
-      throw new appError("email is required", 400);
-    }
-    if (!password) {
-      throw new appError("password is required", 400);
-    }
+    // if (!email) {
+    //   throw new appError("email is required", 400);
+    // }
+    // if (!password) {
+    //   throw new appError("password is required", 400);
+    // }
     //* find user by email
     const user = await User.findOne({ email: email }).select("+password");
     if (!user) {
@@ -102,7 +102,7 @@ export const login = catchAsync(
       throw new appError("credentials does not matched", 400);
     }
 
-         sendEmail({
+      sendEmail({
       to:user.email,
       subject:"Account Created",
       html:newLoginDetectedHtml({

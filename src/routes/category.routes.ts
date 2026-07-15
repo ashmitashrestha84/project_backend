@@ -7,7 +7,7 @@ import {
   remove,
 } from "../controllers/category.controller";
 import { uploader } from "../middlewares/multer.middleware";
-import { All_Admin } from "../types/enumtypes";
+import { All_Admin} from "../types/enumtypes";
 import { authenticate } from "../middlewares/auth.middleware";
 
 const router = express.Router();

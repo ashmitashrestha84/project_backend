@@ -19,6 +19,7 @@ export const errorHandler=(error:any,req:Request, res:Response, next:NextFunctio
         status,
         statusCode,
         data:null,
+        details:error?.errors??null,
         originalError: error?.stack,
     })
 }

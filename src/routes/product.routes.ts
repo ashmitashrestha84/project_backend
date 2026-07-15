@@ -1,6 +1,10 @@
 import express from "express";
 import { getAll,getById,create,update,remove, getByBrand, getFeatured, getNewArrivals, getByCategory } from "../controllers/product.controller";
 import { uploader } from "../middlewares/multer.middleware";
+import { validate } from "../middlewares/validator.middleware";
+import { productValidateSchema } from "../validators/product.validator";
+import { authenticate } from "../middlewares/auth.middleware";
+import { All_Admin } from "../types/enumtypes";
 
 
 const router=express.Router();
@@ -19,9 +23,10 @@ router.post("/",upload.fields([{
         maxCount:1,
     },
     {
-        name:"images"
+        name:"images",
+        maxCount:5,
     }
-]),create);
+]),authenticate(All_Admin),validate(productValidateSchema),create);
 
 router.put("/:id",update);
 router.delete("/:id",remove);
