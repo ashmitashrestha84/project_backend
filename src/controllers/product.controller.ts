@@ -163,10 +163,7 @@ export const update=catchAsync(async(req:Request,res:Response,next:NextFunction)
       ...uploadedImages,
     ];
 
-    // ============================
-    // Update Product
-    // ============================
-
+    
     const updatedProduct = await Product.findOneAndUpdate(
       { _id: id },updateData,{
         new: true,

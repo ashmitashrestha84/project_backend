@@ -4,6 +4,7 @@ import userRoutes from "./user.routes";
 import brandRoutes from "./brand.routes";
 import categoryRoutes from "./category.routes";
 import productRoutes from "./product.routes"
+import cartRoutes from "./cart.routes"
 
 const router=express.Router();
 
@@ -12,5 +13,6 @@ router.use("/users",userRoutes);
 router.use("/brands",brandRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/products",productRoutes);
+router.use("/carts",cartRoutes);
 
 export default router;
