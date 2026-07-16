@@ -5,6 +5,7 @@ import brandRoutes from "./brand.routes";
 import categoryRoutes from "./category.routes";
 import productRoutes from "./product.routes"
 import cartRoutes from "./cart.routes"
+import wishlistRoutes from "./wishlist.routes"
 
 const router=express.Router();
 
@@ -14,5 +15,6 @@ router.use("/brands",brandRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/products",productRoutes);
 router.use("/carts",cartRoutes);
+router.use("/wishlists",wishlistRoutes);
 
 export default router;
