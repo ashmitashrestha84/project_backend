@@ -1,0 +1,1 @@
+//{ user:user_id, items[{product_id,quantity:number}]}
