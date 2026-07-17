@@ -2,18 +2,41 @@ import { Request, Response, NextFunction } from "express";
 import Category from "../models/category.model";
 import { catchAsync } from "../utils/catchAsync.utils";
 import AppError from "../utils/appError.utils";
-import { upload } from "../utils/cloudinary.utlis";
+import { deleteFile, upload } from "../utils/cloudinary.utlis";
 import { sendResponse } from "../utils/sendResponse.utlis";
+import appError from "../utils/appError.utils";
 const uploadFolder="/categories";
 
 
 export const getAll = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const categories = await Category.find();
 
-    res.status(200).json({
-      success: true,
-      count: categories.length,
+      const { query } = req.query;
+
+  const filter: Record<string, any> = {};
+
+  if (query) {
+       filter.$or=[
+      {
+        name:{
+          $regex:query,
+          $options:"i",
+        }
+      },
+      {
+        description:
+        {
+          $regex:query,
+          $options:"i",
+        }
+      }
+    ]
+  }
+  const categories = await Category.find(filter);
+
+    sendResponse(res,{
+      message:"category fetched successfully",
+      statusCode:201,
       data: categories,
     });
   },
@@ -28,10 +51,9 @@ export const getById = catchAsync(
       throw new AppError("category not found", 404);
     }
 
-    res.status(200).json({
+    sendResponse(res,{
       message: `category by id ${id} is fetched`,
-      success: true,
-      status: "success",
+      statusCode:201 ,
       data: category,
     });
   },
@@ -43,60 +65,61 @@ export const create = catchAsync(
     const file=req.file;
     const { name, description } = req.body;
 
-    if (!name) throw new AppError("name is required", 404);
-    if (!description) throw new AppError("description is required", 404);
-
     const existingCategory = await Category.findOne({ name });
     if (existingCategory) {
       throw new AppError("name already exists", 404);
     }
 
-const category = new Category({ name, description });
-if (file) {
-  const { path, public_id } = await upload(file, uploadFolder);
-  category.logo = {
-    path,
-    public_id,
-  };
-}
+  const category = new Category({ name, description });
+  if (file) {
+    const { path, public_id } = await upload(file, uploadFolder);
+    category.logo = {
+      path,
+      public_id,
+    };
+  }
 
-await category.save();
-    res.status(201).json({
-      message: "Category created successfully",
-      status: "success",
-      success: true,
-      data: category,
+  await category.save();
+      sendResponse(res,{
+        message: "Category created successfully",
+        statusCode:201,
+        data: category,
+      });
+    },
+  );
+
+
+
+    export const update = catchAsync(async (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ) => {
+      const file=req.file;
+        const {id} = req.params;
+       const {name,description}=req.body;
+
+       const category= await Category.findOne({_id:id});
+
+      if(!category) throw new appError("Brand doesnot exist",404);
+      if(name) category.name=name;
+      if(description) category.description=description;
+      if(file){
+        await deleteFile(category.logo.public_id);
+        const {path,public_id}= await upload(file,uploadFolder);
+        category.logo={
+          path,
+          public_id,
+        }
+      }
+      await category.save();
+      sendResponse(res,{
+        message:"Category updated",
+        statusCode:201,
+        data:category,
+      })
+
     });
-  },
-);
-
-
-
-export const update = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
-
-    const existingCategory = await Category.findById({ id });
-
-    if (!existingCategory) {
-      throw new AppError("Brand does not exist", 404);
-    }
-
-    const { name, description } = req.body;
-
-    const updatedCategory = await Category.findByIdAndUpdate(
-      { _id: id },
-      { name, description },
-      { new: true },
-    );
-
-    sendResponse(res,{
-      message: "Brand updated successfully.",
-      statusCode:200,
-      data: updatedCategory,})
-  },
-);
-
 
 export const remove = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -106,11 +129,13 @@ export const remove = catchAsync(
     if (!category) {
       throw new AppError("category not found.", 404);
     }
+    if(category.logo.public_id){
+      await deleteFile(category.logo.public_id);
+    }
 
-    res.status(200).json({
+    sendResponse(res,{
       message: "category deleted successfully.",
-      success: true,
-      status: "success",
+      statusCode:201,
       data: null,
     });
   },
