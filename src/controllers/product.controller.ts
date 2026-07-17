@@ -7,12 +7,70 @@ import { deleteFile, upload } from "../utils/cloudinary.utlis";
 
 
 
+
 const uploadFolder="/products";
 
 
 //* getall
 export const getAll=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
-    const product = await Product.find();
+    
+      const { query ,category,brand,minPrice, maxPrice} = req.query;
+
+    const filter: Record<string, any> = {};
+
+    if (query) {
+        filter.$or=[
+        {
+            name:{
+            $regex:query,
+            $options:"i",
+            }
+        },
+        {
+            description:
+            {
+            $regex:query,
+            $options:"i",
+            }
+        }
+        ]
+    }
+
+    //* category
+    if(category){
+        filter.category=category;
+    }
+    if(brand){
+        filter.brand=brand;
+    }
+
+    //* price range
+    if(minPrice || maxPrice){
+        const low=Number(minPrice);
+        const high=Number(maxPrice);
+        console.log(low,high)
+        
+        if(low){
+            filter.price={
+                $gte:low,
+            }
+        }
+        if(high){
+            filter.price={
+                $lte:high,
+            }
+        }
+        if(low && high){
+            filter.price={
+                $lte:high,
+                $gte:low,
+            };
+        }
+    }
+    console.log(maxPrice);
+    const product = await Product.find(filter)
+  .populate("brand")
+  .populate("category");
 
     //* send success response
     sendResponse(res,{
@@ -41,6 +99,7 @@ export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)
         product_image?:Express.Multer.File[],
         images?: Express.Multer.File[],
     };
+
     const {name,price,description,category,brand,new_arrival,is_featured}=req.body;
 
      if(!product_image || !product_image[0]){
@@ -81,7 +140,7 @@ export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)
             product.set('images',fullFilled);
     }
     
-    await product.save;
+    await product.save();
       //* Populate references
     await product.populate("brand");
     await product.populate("category");
@@ -99,19 +158,19 @@ export const update=catchAsync(async(req:Request,res:Response,next:NextFunction)
         images?: Express.Multer.File[],
     };
     const {id}=req.params;
-    const {name,price,description,is_featured,new_arrival,deleted_images}=req.body;
+    const {name,price,description,category,brand,is_featured,new_arrival,deleted_images}=req.body;
 
     const product=await Product.findOne({_id:id})
 
     if(!product ) throw new appError("Product is required",404);
 
-
-    if(name) product.name=name;
-    if(price) product.price=price;
-    if(description) product.description=description;
-    if(is_featured) product.is_featured=is_featured;
-    if(new_arrival) product.new_arrival=new_arrival;
-
+    if (name) product.name = name;
+    if (description) product.description = description;
+    if (category) product.category = category;
+    if (brand) product.brand = brand;
+    if (price) product.price = price;
+    if (new_arrival) product.new_arrival = new_arrival;
+    if (is_featured) product.is_featured = is_featured;
 
     
     if(product_image && product_image[0]){
@@ -121,61 +180,46 @@ export const update=catchAsync(async(req:Request,res:Response,next:NextFunction)
             path,
             public_id,
         }
-    }
-
-//* delete selected images
-    const deletedImages: string[] = deleted_images
-      ? JSON.parse(deleted_images)
-      : [];
-
-    if (deletedImages.length > 0) {
-      //* Delete from Cloudinary
-      await Promise.allSettled(
-        deletedImages.map((public_id) => deleteFile(public_id))
-      );
-    }
-    //* Remaining Images
-    const remainingImages = product.images.filter(
-      (img) => !deletedImages.includes(img.public_id)
+    } 
+//* if deleted images
+  if (
+    deleted_images &&
+    Array.isArray(deleted_images) &&
+    deleted_images.length > 0
+  ) 
+  { //* delete from cloudinary
+    Promise.allSettled(
+      deleted_images.map((public_id) => deleteFile(public_id)),  
     );
 
-    //* upload new images
-    const uploadedImages: {
-      path: string;
-      public_id: string;
-    }[] = [];
+    //* remaining images
+    product.images = product.images.filter(
+      (img) => !deleted_images.includes(img.public_id.toString()),
+    ) as any;
+  }
 
-    for (const file of images ?? []) {
-      const { path, public_id } = await upload(
-        file,
-        uploadFolder
-      );
-      uploadedImages.push({
-        path,
-        public_id,
-      });
-    }
+  //* if new images
+  if (images && images.length > 0) {
+    // [{status:'',value:{path,public_id}}]
+    const files = await Promise.allSettled(
+      images.map((file) => upload(file, uploadFolder)),
+    );
 
-    //*merge images
-    const updateData: any = {};
-    updateData.images = [
-      ...remainingImages,
-      ...uploadedImages,
-    ];
+    const newImages = files
+      .filter((file) => file.status === "fulfilled")
+      .map((file) => file.value);
+    product.set("images", [...product.images, ...newImages]);
+  }
 
-    
-    const updatedProduct = await Product.findOneAndUpdate(
-      { _id: id },updateData,{
-        new: true,
-        runValidators: true,
-      })
-      .populate("brand")
-      .populate("category");
+   
+    //* save product
+    await product.save();
 
+    //* send successful response
     sendResponse(res, {
-      message: "Product Updated Successfully",
-      statusCode: 200,
-      data: updatedProduct,
+        message: `product:${id} updated`,
+        data: product,
+        statusCode: 200,
     });
 });
 
@@ -198,7 +242,7 @@ export const remove = catchAsync(async (req: Request,res: Response,next: NextFun
 
     //* delete product
 
-    await product.deleteOne();
+    await product.save();
 
     sendResponse(res,{
       message: "Product deleted successfully",
@@ -212,8 +256,8 @@ export const remove = catchAsync(async (req: Request,res: Response,next: NextFun
   //* get by category
   export const getByCategory = catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const {id}=req.params;
-    const category= await Product.findOne({category:id}).populate("category");
-    if(!category){
+    const category= await Product.find({category:id}).populate("category");
+    if(category.length===0){
         throw new appError("Category ID not found",404);
     }
     
@@ -228,8 +272,8 @@ export const remove = catchAsync(async (req: Request,res: Response,next: NextFun
   //* get by brand
     export const getByBrand = catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const {id}=req.params;
-    const brand= await Product.findOne({brand:id}).populate("brand");
-    if(!brand){
+    const brand= await Product.find({brand:id}).populate("brand");
+    if(brand.length===0){
         throw new appError("Brand ID not found",404);
     }
     
@@ -265,7 +309,7 @@ export const remove = catchAsync(async (req: Request,res: Response,next: NextFun
   export const getFeatured = catchAsync(
     async (req: Request, res: Response, next: NextFunction) => {
         const products = await Product.find({
-            isFeatured: true,
+            is_featured: true,
         })
             .populate("brand")
             .populate("category");
