@@ -4,16 +4,16 @@ import { uploader } from "../middlewares/multer.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
 import { All_Admin} from "../types/enumtypes";
 import { validate } from "../middlewares/validator.middleware";
-import { brandUserSchema } from "../validators/brand.validator";
+import { brandIdSchema, createBrandSchema, deleteBrandSchema, getBrandsSchema, updateBrandSchema } from "../validators/brand.validator";
 const router=express.Router();
 
 const upload=uploader();
 
 
-router.get("/",getAll);
-router.get("/:id",getById);
-router.post("/",upload.single("logo"),authenticate(All_Admin),validate(brandUserSchema),create);
-router.put("/:id",upload.single("logo"),authenticate(All_Admin),validate(brandUserSchema),update);
-router.delete("/:id",authenticate(All_Admin),remove);
+router.get("/",validate(getBrandsSchema),getAll);
+router.get("/:id",validate(brandIdSchema),getById);
+router.post("/",upload.single("logo"),authenticate(All_Admin),validate(createBrandSchema),create);
+router.put("/:id",upload.single("logo"),authenticate(All_Admin),validate(updateBrandSchema),update);
+router.delete("/:id",authenticate(All_Admin),validate(deleteBrandSchema),remove);
 
 export default router;
