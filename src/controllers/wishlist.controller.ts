@@ -94,7 +94,7 @@ export const clearWishlist=catchAsync(async(req:Request,res:Response,next:NextFu
 
 //delete
 
-export const deleteWishlist=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+export const removeWishlist=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const user=req.user._id;
     
 

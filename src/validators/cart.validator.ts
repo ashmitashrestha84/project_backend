@@ -24,7 +24,7 @@ export const UpdateCartSchema=z.object({
     })
 })
 
-export const deleteCartSchema = z.object({
+export const removeCartSchema = z.object({
   body: z.object({
     product_id: z
       .string()

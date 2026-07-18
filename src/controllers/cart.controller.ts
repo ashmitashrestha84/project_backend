@@ -113,7 +113,7 @@ export const updateCart=catchAsync(async(req:Request,res:Response,next:NextFunct
 
 
 //delete cart
-export const deleteCart=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+export const removeCart=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const user_id=req.user._id;
     const { product_id}=req.body;
 
