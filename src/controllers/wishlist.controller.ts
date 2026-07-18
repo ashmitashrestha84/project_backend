@@ -60,38 +60,60 @@ export const addToWishlist = catchAsync(
 );
 
 //get
-
-export const getWishlist=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
+  export const getWishlist=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
     const user=req.user._id;
-    const wishlist= await Wishlist.findOne({user}).populate("product");
-    if(!wishlist) throw new appError("wishlist doesnot exists",404);
+    if(!user) throw new appError("No user found",404);
+    const wishlist=await Wishlist.findOne({user}).populate({
+      path: "products",
+      populate: [
+        {
+          path: "brand",
+        },
+        {
+          path: "category",
+        },
+      ],
+    });
 
-    sendResponse(res,{
-        message:"Wishlist fetched Successfully",
-        statusCode:201,
-        data:wishlist,
-    })
-})
+  if (!wishlist) throw new appError("Wishlist not found", 404);
+  sendResponse(res, {
+    message: "Wishlist fetched successfully",
+    statusCode: 200,
+    data: wishlist,
+  });
+  });
 
-//clear
 
-export const clearWishlist=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
-    const user=req.user._id;
-    const {product}=req.body;
 
-    const wishlist= await Wishlist.findOne({user});
-    if(!wishlist) throw new appError("no wishlist exists",404);
 
-    const exists=wishlist.products.find((id)=>id.toString()!==product)
-    if(!exists) throw new appError("no product exists in given wishlist",404);
+  export const clearWishlist = catchAsync(async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const user = req.user._id;
+    const { product } = req.body;
 
-    sendResponse(res,{
-        message:"product is removed from wishlist",
-        statusCode:201,
-        data:exists,
-    })
-})
+    const wishlist = await Wishlist.findOne({ user });
 
+    if (!wishlist) throw new appError("No wishlist exists", 404);
+
+    const exists = wishlist.products.find(
+      (id) => id.toString() === product
+    );
+
+    if (!exists) throw new appError("Product not found in wishlist", 404);
+
+    wishlist.products = wishlist.products.filter(
+      (id) => id.toString() !== product);
+      
+    await wishlist.save();
+    sendResponse(res, {
+      message: "Product removed from wishlist successfully",
+      statusCode: 200,
+      data: wishlist,
+    });
+  });
 //delete
 
 export const removeWishlist=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
@@ -102,6 +124,7 @@ export const removeWishlist=catchAsync(async(req:Request,res:Response,next:NextF
     if(!wishlist) throw new appError("no wishlist exists",404);
 
     wishlist.products=[]
+    await wishlist.save();
 
     sendResponse(res,{
         message:"product is removed from wishlist",
