@@ -109,13 +109,7 @@ export const updateCart=catchAsync(async(req:Request,res:Response,next:NextFunct
       statusCode: 200,
       data: cart,
     });
-
-    sendResponse(res, {
-      message: "Cart updated successfully",
-      statusCode: 200,
-      data: cart,
-    });
-})
+  });
 
 
 //delete cart
