@@ -8,7 +8,7 @@ export interface IBrand extends Document {   //tells the typescript that the obj
   logo: {
     path: string;
     public_id: string;
-  } | null;
+  };
 }
 
 const brandSchema= new Schema<IBrand>({
@@ -28,6 +28,7 @@ const brandSchema= new Schema<IBrand>({
     logo:{
         type:imageSchema,
         default:null,
+        required:true,
     }
 
 },{ timestamps: true })

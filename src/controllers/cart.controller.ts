@@ -8,48 +8,65 @@ import { sendResponse } from "../utils/sendResponse.utlis";
 
 
 
-export const create=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
-        const user_id = req.user._id;
-        const {product_id,quantity} =req.body;
+export const create = catchAsync(async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const user_id = req.user._id;
+  const { product_id, quantity } = req.body;
 
-        const product= await Product.findOne({_id:product_id});
-        if(!product)
-            throw new appError("product not found",404);
+  //* Check if product exists
+  const product = await Product.findById(product_id);
+  if (!product) {
+    throw new appError("Product not found", 404);
+  }
 
-        let cart=await Cart.findOne({user_id});
-        if(!cart){
-        cart=new Cart({
-            user:user_id,
-            items:[
-               { 
-                product:product_id,
-                quantity,
-               }
-            ]
-        })
-        }
-        await cart.save();
+  //* Find user's cart
+  let cart = await Cart.findOne({ user_id });
 
-        const item = cart.items.find(
-        (item) => item.product_id.toString() === product_id);
+  //* If cart doesn't exist, create it
+  if (!cart) {
+    cart = new Cart({
+      user_id,
+      items: [
+        {
+          product_id,
+          quantity,
+        },
+      ],
+    });
 
-        if (item) {
-        item.quantity+=quantity;
-        } else {
-        cart.items.push({
-            product_id,
-            quantity,
-        });
-        }
-        await cart.save();
+    await cart.save();
+    sendResponse(res, {
+      message: "Cart created successfully",
+      statusCode: 201,
+      data: cart,
+    });
+  }
 
-        sendResponse(res, {
-        message: "Cart updated successfully",
-        statusCode: 200,
-        data: cart,
-        });
-})
+  //* Check if product already exists in cart
+  const item = cart.items.find(
+    (item) => item.product_id.toString() === product_id
+  );
 
+  if (item) {
+    item.quantity += quantity;
+  } else {
+    cart.items.push({
+      product_id,
+      quantity,
+    });
+  }
+
+  await cart.save();
+
+  sendResponse(res, {
+    message: "Cart updated successfully",
+    statusCode: 200,
+    data: cart,
+  });
+});
 
 //get
 

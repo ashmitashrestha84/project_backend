@@ -3,6 +3,7 @@ import { catchAsync } from "../utils/catchAsync.utils";
 import { Wishlist } from "../models/wishlist.model";
 import appError from "../utils/appError.utils";
 import { sendResponse } from "../utils/sendResponse.utlis";
+import Product from "../models/product.model";
 
 
 
@@ -12,7 +13,7 @@ export const addToWishlist = catchAsync(
     const { product } = req.body;
 
     // Check if product exists
-    const existingProduct = await Wishlist.findOne({product});
+    const existingProduct = await Product.findOne({_id:product});
 
     if (!existingProduct) {
       throw new appError("Product not found", 404);

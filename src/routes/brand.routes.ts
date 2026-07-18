@@ -3,6 +3,8 @@ import { getAll,getById,create,update,remove } from "../controllers/brand.contro
 import { uploader } from "../middlewares/multer.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
 import { All_Admin} from "../types/enumtypes";
+import { validate } from "../middlewares/validator.middleware";
+import { brandUserSchema } from "../validators/brand.validator";
 const router=express.Router();
 
 const upload=uploader();
@@ -10,8 +12,8 @@ const upload=uploader();
 
 router.get("/",getAll);
 router.get("/:id",getById);
-router.post("/",upload.single("logo"),authenticate(All_Admin),create);
-router.put("/:id",upload.single("logo"),authenticate(All_Admin),update);
+router.post("/",upload.single("logo"),authenticate(All_Admin),validate(brandUserSchema),create);
+router.put("/:id",upload.single("logo"),authenticate(All_Admin),validate(brandUserSchema),update);
 router.delete("/:id",authenticate(All_Admin),remove);
 
 export default router;

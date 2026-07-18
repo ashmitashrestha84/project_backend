@@ -8,7 +8,7 @@ export interface ICategory extends Document {
   logo: {
     path: string;
     public_id: string;
-  } | null;
+  };
 }
 
 //* Category Schema
@@ -33,6 +33,7 @@ const categorySchema = new Schema<ICategory>(
     logo: {
       type: imageSchema,
       default:null,
+      required:true,
     },
   },
   {
