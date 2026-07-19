@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const brand_controller_1 = require("../controllers/brand.controller");
+const multer_middleware_1 = require("../middlewares/multer.middleware");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const enumtypes_1 = require("../types/enumtypes");
+const validator_middleware_1 = require("../middlewares/validator.middleware");
+const brand_validator_1 = require("../validators/brand.validator");
+const router = express_1.default.Router();
+const upload = (0, multer_middleware_1.uploader)();
+router.get("/", (0, validator_middleware_1.validate)(brand_validator_1.getBrandsSchema), brand_controller_1.getAll);
+router.get("/:id", (0, validator_middleware_1.validate)(brand_validator_1.brandIdSchema), brand_controller_1.getById);
+router.post("/", upload.single("logo"), (0, auth_middleware_1.authenticate)(enumtypes_1.All_Admin), (0, validator_middleware_1.validate)(brand_validator_1.createBrandSchema), brand_controller_1.create);
+router.put("/:id", upload.single("logo"), (0, auth_middleware_1.authenticate)(enumtypes_1.All_Admin), (0, validator_middleware_1.validate)(brand_validator_1.updateBrandSchema), brand_controller_1.update);
+router.delete("/:id", (0, auth_middleware_1.authenticate)(enumtypes_1.All_Admin), (0, validator_middleware_1.validate)(brand_validator_1.deleteBrandSchema), brand_controller_1.remove);
+exports.default = router;
