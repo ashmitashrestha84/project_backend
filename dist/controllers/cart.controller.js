@@ -10,6 +10,7 @@ const appError_utils_1 = __importDefault(require("../utils/appError.utils"));
 const product_model_1 = __importDefault(require("../models/product.model"));
 const sendResponse_utlis_1 = require("../utils/sendResponse.utlis");
 exports.create = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
+    console.log(req.user);
     const user_id = req.user._id;
     const { product_id, quantity } = req.body;
     //* Check if product exists
@@ -23,15 +24,10 @@ exports.create = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     if (!cart) {
         cart = new cart_model_1.Cart({
             user_id,
-            items: [
-                {
-                    product_id,
-                    quantity,
-                },
-            ],
+            items: [{ product_id, quantity }],
         });
         await cart.save();
-        (0, sendResponse_utlis_1.sendResponse)(res, {
+        return (0, sendResponse_utlis_1.sendResponse)(res, {
             message: "Cart created successfully",
             statusCode: 201,
             data: cart,

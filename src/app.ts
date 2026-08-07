@@ -1,10 +1,10 @@
 import express, { NextFunction, Request, Response } from "express";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 //! importing routes
-import routes from "./routes"    //index may or maynot be written
-
+import routes from "./routes"; //index may or maynot be written
 
 // @types_packageName -> npm i -D  @types_packageName
 //* creating app instances
@@ -13,6 +13,11 @@ const app = express();
 //! using middlewares
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
 
 //* health routes
 app.get("/", (req: Request, res: Response, next: NextFunction) => {

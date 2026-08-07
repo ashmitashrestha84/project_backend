@@ -10,7 +10,7 @@ const cart_validator_1 = require("../validators/cart.validator");
 const auth_middleware_1 = require("../middlewares/auth.middleware");
 const enumtypes_1 = require("../types/enumtypes");
 const router = express_1.default.Router();
-router.get("/", cart_controller_1.getCart);
+router.get("/", (0, auth_middleware_1.authenticate)(enumtypes_1.User_Only), cart_controller_1.getCart);
 router.post("/", (0, auth_middleware_1.authenticate)(enumtypes_1.User_Only), (0, validator_middleware_1.validate)(cart_validator_1.CreateCartSchema), cart_controller_1.create);
 router.put("/:id", (0, auth_middleware_1.authenticate)(enumtypes_1.User_Only), (0, validator_middleware_1.validate)(cart_validator_1.UpdateCartSchema), cart_controller_1.updateCart);
 router.delete("/", cart_controller_1.clearCart);

@@ -9,7 +9,7 @@ import {  User_Only } from "../types/enumtypes";
 
 const router=express.Router();
 
-router.get("/",getCart);
+router.get("/", authenticate(User_Only),getCart);
 router.post("/", authenticate(User_Only),validate(CreateCartSchema),create);
 router.put("/:id",authenticate(User_Only),validate(UpdateCartSchema),updateCart);
 router.delete("/",clearCart);

@@ -13,6 +13,8 @@ export const create = catchAsync(async (
   res: Response,
   next: NextFunction
 ) => {
+
+  console.log(req.user);
   const user_id = req.user._id;
   const { product_id, quantity } = req.body;
 
@@ -26,24 +28,20 @@ export const create = catchAsync(async (
   let cart = await Cart.findOne({ user_id });
 
   //* If cart doesn't exist, create it
-  if (!cart) {
-    cart = new Cart({
-      user_id,
-      items: [
-        {
-          product_id,
-          quantity,
-        },
-      ],
-    });
+if (!cart) {
+  cart = new Cart({
+    user_id,
+    items: [{ product_id, quantity }],
+  });
 
-    await cart.save();
-    sendResponse(res, {
-      message: "Cart created successfully",
-      statusCode: 201,
-      data: cart,
-    });
-  }
+  await cart.save();
+
+  return sendResponse(res, {
+    message: "Cart created successfully",
+    statusCode: 201,
+    data: cart,
+  });
+}
 
   //* Check if product already exists in cart
   const item = cart.items.find(
