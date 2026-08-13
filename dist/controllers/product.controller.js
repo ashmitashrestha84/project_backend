@@ -20,14 +20,14 @@ exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
                 name: {
                     $regex: query,
                     $options: "i",
-                }
+                },
             },
             {
                 description: {
                     $regex: query,
                     $options: "i",
-                }
-            }
+                },
+            },
         ];
     }
     //* category
@@ -73,7 +73,9 @@ exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
 //*get by id
 exports.getById = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     const { id } = req.params;
-    const product = await product_model_1.default.findOne({ _id: id });
+    const product = await product_model_1.default.findById(id)
+        .populate("brand")
+        .populate("category");
     if (!product)
         throw new appError_utils_1.default("No product exits", 404);
     (0, sendResponse_utlis_1.sendResponse)(res, {
@@ -85,7 +87,7 @@ exports.getById = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
 //* create
 exports.create = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     const { product_image, images } = req.files;
-    const { name, price, description, category, brand, new_arrival, is_featured } = req.body;
+    const { name, price, description, category, brand, new_arrival, is_featured, } = req.body;
     if (!product_image || !product_image[0]) {
         throw new appError_utils_1.default("product image is required", 400);
     }
@@ -108,12 +110,12 @@ exports.create = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     //Promise.race(arr_promise)   //gives result of first fulfilled promise
     //Promise.any(arr_promise)
     if (images && images.length > 0) {
-        const promises = images.map(file => (0, cloudinary_utlis_1.upload)(file, uploadFolder));
+        const promises = images.map((file) => (0, cloudinary_utlis_1.upload)(file, uploadFolder));
         const files = await Promise.allSettled(promises);
         const fullFilled = files
-            .filter(promise => promise.status === 'fulfilled')
+            .filter((promise) => promise.status === "fulfilled")
             .map((img) => img.value);
-        product.set('images', fullFilled);
+        product.set("images", fullFilled);
     }
     await product.save();
     //* Populate references
@@ -122,13 +124,13 @@ exports.create = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     (0, sendResponse_utlis_1.sendResponse)(res, {
         message: "Product created",
         statusCode: 200,
-        data: product
+        data: product,
     });
 });
 exports.update = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     const { product_image, images } = req.files;
     const { id } = req.params;
-    const { name, price, description, category, brand, is_featured, new_arrival, deleted_images } = req.body;
+    const { name, price, description, category, brand, is_featured, new_arrival, deleted_images, } = req.body;
     const product = await product_model_1.default.findOne({ _id: id });
     if (!product)
         throw new appError_utils_1.default("Product is required", 404);
@@ -157,7 +159,8 @@ exports.update = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     //* if deleted images
     if (deleted_images &&
         Array.isArray(deleted_images) &&
-        deleted_images.length > 0) { //* delete from cloudinary
+        deleted_images.length > 0) {
+        //* delete from cloudinary
         Promise.allSettled(deleted_images.map((public_id) => (0, cloudinary_utlis_1.deleteFile)(public_id)));
         //* remaining images
         product.images = product.images.filter((img) => !deleted_images.includes(img.public_id.toString()));

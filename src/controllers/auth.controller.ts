@@ -9,26 +9,26 @@ import { IJwtPayload } from "../types/globaltypes";
 import ENV_CONFIG from "../config/env.config";
 import { sendResponse } from "../utils/sendResponse.utlis";
 import { sendEmail } from "../utils/emailService.utils";
-import { accountCreatedHtml,newLoginDetectedHtml } from "../utils/emailTemplate.utils";
+import {
+  accountCreatedHtml,
+  newLoginDetectedHtml,
+} from "../utils/emailTemplate.utils";
 
-const uploadFolder="/profile_images";
+const uploadFolder = "/profile_images";
 
 //*  register
 //create
-export const register = catchAsync(async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const register = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
     const { full_name, email, password, phone } = req.body;
-    const file=req.file;
+    const file = req.file;
     console.log(file);
     // if (!full_name) {
     // //   const error: any = new Error("fullname is required");
     // //   error.StatusCode = 404;
     // //   error.Status = "fail";
     // //   throw error;
-    // throw new appError('full_name is required',400); 
+    // throw new appError('full_name is required',400);
     // }
     // if (!email) throw new appError('email is required',400);
     // if (!password) {
@@ -41,43 +41,42 @@ export const register = catchAsync(async (
     user.password = hashPass;
 
     //* handle profile image
-    if(file){
+    if (file) {
       //* upload to clodinary
-      const {path,public_id} = await upload(file,uploadFolder);
+      const { path, public_id } = await upload(file, uploadFolder);
 
-      user.profile_image={
+      user.profile_image = {
         path,
         public_id,
-      }
-
+      };
     }
     //!save user
     await user.save();
 
-
     //email template
 
     //* send account created email
-     sendEmail({
-      to:user.email,
-      subject:"Account Created",
-      html:accountCreatedHtml({
-        full_name:user.full_name,
-        email:user.email,
-        createdAt:user.createdAt,
-      })
-    })
+    sendEmail({
+      to: user.email,
+      subject: "Account Created",
+      html: accountCreatedHtml({
+        full_name: user.full_name,
+        email: user.email,
+        createdAt: user.createdAt,
+      }),
+    });
 
     //* converting mongoose doc to js object
-    const {password:user_pass,...rest}=user.toObject();
+    const { password: user_pass, ...rest } = user.toObject();
 
     //* success response
-    sendResponse(res,{
-      message:"Account created",
-      statusCode:201,
-      data:rest,
-    })
-});
+    sendResponse(res, {
+      message: "Account created",
+      statusCode: 201,
+      data: rest,
+    });
+  },
+);
 
 //* login
 export const login = catchAsync(
@@ -102,91 +101,115 @@ export const login = catchAsync(
       throw new appError("credentials does not matched", 400);
     }
 
-      sendEmail({
-      to:user.email,
-      subject:"Account Created",
-      html:newLoginDetectedHtml({
-        full_name:user.full_name,
-        email:user.email,
-        loginTime:new Date(Date.now()),
-        device:req.headers["user-agent"]!!,
-      })
-    })
+    sendEmail({
+      to: user.email,
+      subject: "Account Created",
+      html: newLoginDetectedHtml({
+        full_name: user.full_name,
+        email: user.email,
+        loginTime: new Date(Date.now()),
+        device: req.headers["user-agent"]!!,
+      }),
+    });
 
     //* jwt token
-    const payload:IJwtPayload={
-      _id:user._id,
-      email:user.email,
-      role:user.role,
-    }
-    const access_token=generateJwtToken(payload)
-    res.cookie('access_token',access_token,{
-      httpOnly:ENV_CONFIG.NODE_ENV==="development" ? false:true,  //production->true  development->false
-      secure:ENV_CONFIG.NODE_ENV==="development" ? false:true,
+    const payload: IJwtPayload = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    };
+    const access_token = generateJwtToken(payload);
+    res.cookie("access_token", access_token, {
+      httpOnly: ENV_CONFIG.NODE_ENV === "development" ? false : true, //production->true  development->false
+      secure: ENV_CONFIG.NODE_ENV === "development" ? false : true,
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      sameSite:ENV_CONFIG.NODE_ENV==="development" ? "lax":"none",   //production->none    
-    })
+      sameSite: ENV_CONFIG.NODE_ENV === "development" ? "lax" : "none", //production->none
+    });
 
-
-
-      const {password:p, ...rest}=user.toObject();
-  //* success response
+    const { password: p, ...rest } = user.toObject();
+    //* success response
 
     sendResponse(res, {
       statusCode: 200,
       message: "Login User",
       data: {
-        user:rest,
+        user: rest,
         access_token,
       },
     });
-  // res.status(201).json({
-  //   message:"login success",
-  //   status:"success",
-  //   success:true,
-  //   data:{
-  //     user,
-  //     access_token,
-  //   }
-  // })
-})
-
+    // res.status(201).json({
+    //   message:"login success",
+    //   status:"success",
+    //   success:true,
+    //   data:{
+    //     user,
+    //     access_token,
+    //   }
+    // })
+  },
+);
 
 //* logout
-
+export const logout = catchAsync(async (req: Request, res: Response) => {
+  res.clearCookie("access_token", {
+    httpOnly: ENV_CONFIG.NODE_ENV === "development" ? false : true,
+    secure: ENV_CONFIG.NODE_ENV === "development" ? false : true,
+    maxAge: Date.now(),
+    sameSite: ENV_CONFIG.NODE_ENV === "development" ? "lax" : "none",
+  });
+});
 //* get profile
+export const getProfile = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.user._id;
+  const user = await User.findById(id);
+  if (!user) {
+    res.clearCookie("access_token", {
+      httpOnly: ENV_CONFIG.NODE_ENV === "development" ? false : true,
+      secure: ENV_CONFIG.NODE_ENV === "development" ? false : true,
+      maxAge: Date.now(),
+      sameSite: ENV_CONFIG.NODE_ENV === "development" ? "lax" : "none",
+    });
+    throw new appError("profile not found", 400);
+  }
+  sendResponse(res,{
+    message:"Profile Fetched",
+    statusCode:200,
+    data:user
+  })
+});
 
 //* change profile image
-export const changeProfileImage= catchAsync(async(req: Request,res:Response,next:NextFunction)=>{
-    const {_id}=req.user;
-    const file=req.file;
-    if(!file){
-      throw new appError("profile_image is required",400);
+export const changeProfileImage = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { _id } = req.user;
+    const file = req.file;
+    if (!file) {
+      throw new appError("profile_image is required", 400);
     }
-    const user = await User.findOne({_id:_id});
-    if(!user){
-      throw new appError("Profile not found",400);
+    const user = await User.findOne({ _id: _id });
+    if (!user) {
+      throw new appError("Profile not found", 400);
     }
 
     //!delete old Image
-   if(user.profile_image && user.profile_image.public_id){
-     await deleteFile(user.profile_image.public_id);
-   }
-
-    const {path, public_id}= await upload(file,uploadFolder);
-    user.profile_image={
-      path,
-      public_id,
+    if (user.profile_image && user.profile_image.public_id) {
+      await deleteFile(user.profile_image.public_id);
     }
 
-    //* send success response
-    sendResponse(res,{
-      message:"Profile Image updated",
-      statusCode:200,
-      data:user,
-    })
+    const { path, public_id } = await upload(file, uploadFolder);
+    user.profile_image = {
+      path,
+      public_id,
+    };
 
-})
+    //* send success response
+    sendResponse(res, {
+      message: "Profile Image updated",
+      statusCode: 200,
+      data: user,
+    });
+  },
+);
 
 //* change password
 

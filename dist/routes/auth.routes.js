@@ -16,11 +16,11 @@ router.post("/register", upload.single("profile_image"), (0, validator_middlewar
 //* login
 router.post("/login", (0, validator_middleware_1.validate)(auth_validator_1.loginUserSchema), auth_controller_1.login);
 //* get profile
-//router.get("/me",profile)
+router.get("/me", auth_controller_1.getProfile);
 //* change profile_Image
 router.post("/profile-image", upload.single("profile_image"), (0, auth_middleware_1.authenticate)(), auth_controller_1.changeProfileImage);
 //*logout
-//router.post("/logout",logout)
+router.post("/logout", auth_controller_1.logout);
 //* change password
 //* forgot password
 //* change mail

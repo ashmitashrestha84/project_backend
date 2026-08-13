@@ -1,5 +1,5 @@
 import express from "express";
-import { register,login, changeProfileImage } from "../controllers/auth.controller";
+import { register,login, changeProfileImage, getProfile, logout } from "../controllers/auth.controller";
 import { uploader } from "../middlewares/multer.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validator.middleware";
@@ -17,13 +17,13 @@ router.post("/login",validate(loginUserSchema),login);
 
 
 //* get profile
-//router.get("/me",profile)
+router.get("/me",getProfile)
 
 //* change profile_Image
 router.post("/profile-image",upload.single("profile_image"),authenticate(),changeProfileImage);
 
 //*logout
-//router.post("/logout",logout)
+router.post("/logout",logout)
 
 //* change password
 

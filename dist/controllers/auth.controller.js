@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeProfileImage = exports.login = exports.register = void 0;
+exports.changeProfileImage = exports.getProfile = exports.logout = exports.login = exports.register = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
 const bcrypt_utlis_1 = require("../utils/bcrypt.utlis");
 const appError_utils_1 = __importDefault(require("../utils/appError.utils"));
@@ -26,7 +26,7 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => 
     // //   error.StatusCode = 404;
     // //   error.Status = "fail";
     // //   throw error;
-    // throw new appError('full_name is required',400); 
+    // throw new appError('full_name is required',400);
     // }
     // if (!email) throw new appError('email is required',400);
     // if (!password) {
@@ -56,7 +56,7 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => 
             full_name: user.full_name,
             email: user.email,
             createdAt: user.createdAt,
-        })
+        }),
     });
     //* converting mongoose doc to js object
     const { password: user_pass, ...rest } = user.toObject();
@@ -95,7 +95,7 @@ exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
             email: user.email,
             loginTime: new Date(Date.now()),
             device: req.headers["user-agent"],
-        })
+        }),
     });
     //* jwt token
     const payload = {
@@ -104,11 +104,11 @@ exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
         role: user.role,
     };
     const access_token = (0, jwt_utils_1.generateJwtToken)(payload);
-    res.cookie('access_token', access_token, {
+    res.cookie("access_token", access_token, {
         httpOnly: env_config_1.default.NODE_ENV === "development" ? false : true, //production->true  development->false
         secure: env_config_1.default.NODE_ENV === "development" ? false : true,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: env_config_1.default.NODE_ENV === "development" ? "lax" : "none", //production->none    
+        sameSite: env_config_1.default.NODE_ENV === "development" ? "lax" : "none", //production->none
     });
     const { password: p, ...rest } = user.toObject();
     //* success response
@@ -131,7 +131,33 @@ exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     // })
 });
 //* logout
+exports.logout = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    res.clearCookie("access_token", {
+        httpOnly: env_config_1.default.NODE_ENV === "development" ? false : true,
+        secure: env_config_1.default.NODE_ENV === "development" ? false : true,
+        maxAge: Date.now(),
+        sameSite: env_config_1.default.NODE_ENV === "development" ? "lax" : "none",
+    });
+});
 //* get profile
+exports.getProfile = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    const { id } = req.user._id;
+    const user = await user_model_1.default.findById(id);
+    if (!user) {
+        res.clearCookie("access_token", {
+            httpOnly: env_config_1.default.NODE_ENV === "development" ? false : true,
+            secure: env_config_1.default.NODE_ENV === "development" ? false : true,
+            maxAge: Date.now(),
+            sameSite: env_config_1.default.NODE_ENV === "development" ? "lax" : "none",
+        });
+        throw new appError_utils_1.default("profile not found", 400);
+    }
+    (0, sendResponse_utlis_1.sendResponse)(res, {
+        message: "Profile Fetched",
+        statusCode: 200,
+        data: user
+    });
+});
 //* change profile image
 exports.changeProfileImage = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     const { _id } = req.user;
