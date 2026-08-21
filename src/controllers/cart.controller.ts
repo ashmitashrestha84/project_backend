@@ -111,24 +111,30 @@ export const updateCart=catchAsync(async(req:Request,res:Response,next:NextFunct
 
 
 //delete cart
-export const removeCart=catchAsync(async(req:Request,res:Response,next:NextFunction)=>{
-    const user_id=req.user._id;
-    const { product_id}=req.body;
+export const removeCart = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user_id = req.user._id;
+    const { product_id } = req.params;
 
-    const cart= await Cart.findOne({user_id});
+    const cart = await Cart.findOne({ user_id });
+
     if (!cart) {
       throw new appError("No cart exists", 404);
     }
 
-    cart.items= cart.items.filter((item)=>item.product_id.toString()!==product_id);
+    cart.items = cart.items.filter(
+      (item) => item.product_id.toString() !== product_id
+    );
 
     await cart.save();
+
     sendResponse(res, {
       message: "Cart removed successfully",
       statusCode: 200,
       data: cart,
     });
-})
+  }
+);
 
 //clear cart
 

@@ -7,15 +7,11 @@ exports.removeWishlistSchema = exports.createWishlistSchema = void 0;
 const zod_1 = __importDefault(require("zod"));
 exports.createWishlistSchema = zod_1.default.object({
     body: zod_1.default.object({
-        product: zod_1.default
-            .string()
-            .min(1, "product is required"),
-    })
+        product_id: zod_1.default.string().min(1, "Product ID is required"),
+    }),
 });
 exports.removeWishlistSchema = zod_1.default.object({
-    body: zod_1.default.object({
-        product: zod_1.default
-            .string()
-            .min(1, "Product ID is required"),
+    params: zod_1.default.object({
+        id: zod_1.default.string().min(1, "Product ID is required"),
     }),
 });

@@ -86,7 +86,7 @@ exports.updateCart = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) =
 //delete cart
 exports.removeCart = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     const user_id = req.user._id;
-    const { product_id } = req.body;
+    const { product_id } = req.params;
     const cart = await cart_model_1.Cart.findOne({ user_id });
     if (!cart) {
         throw new appError_utils_1.default("No cart exists", 404);

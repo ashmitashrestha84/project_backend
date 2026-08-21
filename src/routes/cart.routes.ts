@@ -11,8 +11,8 @@ const router=express.Router();
 
 router.get("/", authenticate(User_Only),getCart);
 router.post("/", authenticate(User_Only),validate(CreateCartSchema),create);
-router.put("/:id",authenticate(User_Only),validate(UpdateCartSchema),updateCart);
+router.put("/:product_id",authenticate(User_Only),validate(UpdateCartSchema),updateCart);
 router.delete("/",clearCart);
-router.delete("/:id",validate(removeCartSchema),removeCart);
+router.delete("/:product_id",authenticate(User_Only),validate(removeCartSchema),removeCart);
 
 export default router;

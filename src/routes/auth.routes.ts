@@ -17,13 +17,13 @@ router.post("/login",validate(loginUserSchema),login);
 
 
 //* get profile
-router.get("/me",getProfile)
+router.get("/me",authenticate(),getProfile)
 
 //* change profile_Image
 router.post("/profile-image",upload.single("profile_image"),authenticate(),changeProfileImage);
 
 //*logout
-router.post("/logout",logout)
+router.post("/logout",authenticate(),logout)
 
 //* change password
 

@@ -88,6 +88,10 @@ exports.getById = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
 exports.create = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     const { product_image, images } = req.files;
     const { name, price, description, category, brand, new_arrival, is_featured, } = req.body;
+    const existingProduct = await product_model_1.default.findOne({ name });
+    if (existingProduct) {
+        throw new appError_utils_1.default("Product already exists", 409);
+    }
     if (!product_image || !product_image[0]) {
         throw new appError_utils_1.default("product image is required", 400);
     }
@@ -132,8 +136,15 @@ exports.update = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     const { id } = req.params;
     const { name, price, description, category, brand, is_featured, new_arrival, deleted_images, } = req.body;
     const product = await product_model_1.default.findOne({ _id: id });
-    if (!product)
+    if (!product) {
         throw new appError_utils_1.default("Product is required", 404);
+    }
+    // Normalize deleted_images
+    const deletedImageIds = deleted_images
+        ? Array.isArray(deleted_images)
+            ? deleted_images
+            : [deleted_images]
+        : [];
     if (name)
         product.name = name;
     if (description)
@@ -144,39 +155,35 @@ exports.update = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
         product.brand = brand;
     if (price)
         product.price = price;
-    if (new_arrival)
+    if (new_arrival !== undefined) {
         product.new_arrival = new_arrival;
-    if (is_featured)
+    }
+    if (is_featured !== undefined) {
         product.is_featured = is_featured;
+    }
+    //* Change main image
     if (product_image && product_image[0]) {
-        (0, cloudinary_utlis_1.deleteFile)(product.product_image.public_id);
+        await (0, cloudinary_utlis_1.deleteFile)(product.product_image.public_id);
         const { path, public_id } = await (0, cloudinary_utlis_1.upload)(product_image[0], uploadFolder);
         product.product_image = {
             path,
             public_id,
         };
     }
-    //* if deleted images
-    if (deleted_images &&
-        Array.isArray(deleted_images) &&
-        deleted_images.length > 0) {
-        //* delete from cloudinary
-        Promise.allSettled(deleted_images.map((public_id) => (0, cloudinary_utlis_1.deleteFile)(public_id)));
-        //* remaining images
-        product.images = product.images.filter((img) => !deleted_images.includes(img.public_id.toString()));
+    //* Delete existing images
+    if (deletedImageIds.length > 0) {
+        await Promise.allSettled(deletedImageIds.map((public_id) => (0, cloudinary_utlis_1.deleteFile)(public_id)));
+        product.images = product.images.filter((img) => !deletedImageIds.includes(img.public_id.toString()));
     }
-    //* if new images
+    //* Add new images
     if (images && images.length > 0) {
-        // [{status:'',value:{path,public_id}}]
         const files = await Promise.allSettled(images.map((file) => (0, cloudinary_utlis_1.upload)(file, uploadFolder)));
         const newImages = files
             .filter((file) => file.status === "fulfilled")
             .map((file) => file.value);
         product.set("images", [...product.images, ...newImages]);
     }
-    //* save product
     await product.save();
-    //* send successful response
     (0, sendResponse_utlis_1.sendResponse)(res, {
         message: `product:${id} updated`,
         data: product,

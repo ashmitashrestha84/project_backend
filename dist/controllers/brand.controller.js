@@ -38,7 +38,7 @@ exports.create = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
 });
 //* getall
 exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
-    const { query, order = "DESC", sortBy = "createdAt", page = 1, limit = 10 } = req.query;
+    const { query, order = "DESC", sortBy = "createdAt", page = 1, limit = 10, } = req.query;
     const currentPage = Number(page);
     const perPage = Number(limit);
     const skip = (currentPage - 1) * perPage;
@@ -49,14 +49,14 @@ exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
                 name: {
                     $regex: query,
                     $options: "i",
-                }
+                },
             },
             {
                 description: {
                     $regex: query,
                     $options: "i",
-                }
-            }
+                },
+            },
         ];
     }
     // filter.name = {
@@ -67,13 +67,16 @@ exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
         .limit(perPage)
         .skip(skip)
         .sort({
-        [sortBy]: order === "DESC" ? -1 : 1
+        [sortBy]: order === "DESC" ? -1 : 1,
     });
     const totalCount = await brand_model_1.default.countDocuments(filter);
     (0, sendResponse_utlis_1.sendResponse)(res, {
         message: "Brands fetched successfully",
         statusCode: 200,
-        data: { brand, pagination: (0, pagination_utlis_1.getPagination)(totalCount, perPage, currentPage) },
+        data: {
+            brand,
+            pagination: (0, pagination_utlis_1.getPagination)(totalCount, perPage, currentPage),
+        },
     });
 });
 // Get Brand By ID
@@ -101,7 +104,9 @@ exports.update = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
     if (description)
         brand.description = description;
     if (file) {
-        await (0, cloudinary_utlis_1.deleteFile)(brand.logo.public_id);
+        if (brand.logo) {
+            await (0, cloudinary_utlis_1.deleteFile)(brand.logo.public_id);
+        }
         const { path, public_id } = await (0, cloudinary_utlis_1.upload)(file, uploadFolder);
         brand.logo = {
             path,

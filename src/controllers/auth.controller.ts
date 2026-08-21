@@ -157,10 +157,15 @@ export const logout = catchAsync(async (req: Request, res: Response) => {
     maxAge: Date.now(),
     sameSite: ENV_CONFIG.NODE_ENV === "development" ? "lax" : "none",
   });
+  sendResponse(res,{
+    message:"logout success",
+    statusCode:200,
+    data:null,
+  })
 });
 //* get profile
 export const getProfile = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.user._id;
+  const id = req.user._id;
   const user = await User.findById(id);
   if (!user) {
     res.clearCookie("access_token", {
@@ -171,11 +176,11 @@ export const getProfile = catchAsync(async (req: Request, res: Response) => {
     });
     throw new appError("profile not found", 400);
   }
-  sendResponse(res,{
-    message:"Profile Fetched",
-    statusCode:200,
-    data:user
-  })
+  sendResponse(res, {
+    message: "Profile Fetched",
+    statusCode: 200,
+    data: user,
+  });
 });
 
 //* change profile image

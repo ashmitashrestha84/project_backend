@@ -138,10 +138,15 @@ exports.logout = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
         maxAge: Date.now(),
         sameSite: env_config_1.default.NODE_ENV === "development" ? "lax" : "none",
     });
+    (0, sendResponse_utlis_1.sendResponse)(res, {
+        message: "logout success",
+        statusCode: 200,
+        data: null,
+    });
 });
 //* get profile
 exports.getProfile = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
-    const { id } = req.user._id;
+    const id = req.user._id;
     const user = await user_model_1.default.findById(id);
     if (!user) {
         res.clearCookie("access_token", {
@@ -155,7 +160,7 @@ exports.getProfile = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     (0, sendResponse_utlis_1.sendResponse)(res, {
         message: "Profile Fetched",
         statusCode: 200,
-        data: user
+        data: user,
     });
 });
 //* change profile image
