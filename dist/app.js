@@ -13,13 +13,13 @@ const env_config_1 = __importDefault(require("./config/env.config"));
 // @types_packageName -> npm i -D  @types_packageName
 //* creating app instances
 const app = (0, express_1.default)();
-const allowed_origins = env_config_1.default.ALLOWED_ORIGINS?.split(",") ?? [];
-console.log(allowed_origins);
+const origins = env_config_1.default.ALLOWED_ORIGINS?.split(",") ?? [];
+console.log(origins);
 //! using middlewares
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use((0, cookie_parser_1.default)());
 app.use((0, cors_1.default)({
-    origin: allowed_origins,
+    origin: origins,
     credentials: true,
 }));
 //* health routes
